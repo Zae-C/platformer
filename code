@@ -1,0 +1,305 @@
+import pygame
+import random
+pygame.init()
+screen = pygame.display.set_mode((800,800))
+screen.fill((0,0,0))
+clock = pygame.time.Clock() #set up clock
+gameover = False #variable to run our game loop
+
+#CONSTANTS
+LEFT=0
+RIGHT=1
+UP = 2
+DOWN = 3
+A = 4
+D = 5
+W = 6
+S = 7
+
+#MAP: 1 is grass, 2 is brick
+map = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,0 ,0, 0],
+       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ,1 ,1, 1]]
+
+background = pygame.image.load(r'C:\Users\706535\Pictures\city.png') #load your spritesheet
+brick = pygame.image.load(r'C:\Users\706535\Downloads\brick.png') #load your spritesheet
+blue = pygame.image.load(r'C:\Users\706535\Downloads\blue.png') #load your spritesheet
+dirt = pygame.image.load(r'C:\Users\706535\Downloads\dirt.png') #load your spritesheet
+player = pygame.image.load(r'C:\Users\706535\Downloads\hollowknight (2).png') #load your spritesheet
+player.set_colorkey((255, 0, 255)) #this makes bright pink (255, 0, 255) transparent (sort of)
+player2 = pygame.image.load(r'C:\Users\706535\Downloads\hollowknight (2).png') #load your spritesheet
+player2.set_colorkey((255, 0, 255)) #this makes bright pink (255, 0, 255) transparent (sort of)
+
+#player variables
+xpos = 500 #xpos of player
+ypos = 200 #ypos of player
+vx = 0 #x velocity of player
+vy = 0 #y velocity of player
+keys = [False, False, False, False, False, False, False, False, False] #this list holds whether each key has been pressed
+isOnGround = False #this variable stops gravity from pulling you down more when on a platform
+
+xpos2 = 500 #xpos of player
+ypos2 = 200 #ypos of player
+vx2 = 0 #x velocity of player
+vy2 = 0 #y velocity of player
+
+isOnGround2 = False #this variable stops gravity from pulling you down more when on a platform
+
+#animation variables variables
+frameWidth = 80
+frameHeight = 120
+RowNum = 0 #for left animation, this will need to change for other animations
+frameNum = 0
+ticker = 0
+frameWidth2 = 80
+frameHeight2 = 120
+RowNum2 = 0 #for left animation, this will need to change for other animations
+frameNum2 = 0
+ticker2 = 0
+direction = DOWN
+direction2 = S
+
+class platform:
+    def __init__(self, xpos, ypos):
+        self.xpos = xpos
+        self.ypos = ypos
+        self.r=random.randrange(0,250)
+        self.g=random.randrange(0,250)
+        self.b=random.randrange(0,250)
+    def draw(self):
+
+        pygame.draw.rect(screen, (self.r,self.g,self.b), (self.xpos, self.ypos, 50, 20))
+    def collide(self, xpos, ypos):
+        if xpos+20>self.xpos and xpos<self.xpos+50 and ypos+40> self.ypos and ypos < self.ypos+20:
+           return self.ypos
+        else:
+           return False
+       
+#instantiate an object
+p1 = platform(600, 600)
+#create more here!
+platBag = list()
+for i in range(10):
+    platBag.append(platform(random.randrange(100,700), random.randrange(100,700)))
+
+while not gameover:
+    clock.tick(60) #FPS
+    
+    for event in pygame.event.get(): #quit game if x is pressed in top corner
+        if event.type == pygame.QUIT:
+            gameover = True
+      
+        if event.type == pygame.KEYDOWN: #keyboard input
+            if event.key == pygame.K_LEFT:
+                keys[LEFT]=True
+            elif event.key == pygame.K_RIGHT:
+                keys[RIGHT]=True
+            elif event.key == pygame.K_UP:
+                keys[UP]=True
+            if event.key == pygame.K_a:
+                keys[A]=True
+            elif event.key == pygame.K_d:
+                keys[D]=True
+            elif event.key == pygame.K_w:
+                keys[W]=True
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                keys[LEFT]=False
+            elif event.key == pygame.K_RIGHT:
+                keys[RIGHT]=False
+            elif event.key == pygame.K_UP:
+                keys[UP]=False
+            if event.key == pygame.K_a:
+                keys[A]=False
+            elif event.key == pygame.K_d:
+                keys[D]=False
+            elif event.key == pygame.K_w:
+                keys[W]=False     
+
+    #LEFT MOVEMENT
+    if keys[LEFT]==True:
+        vx=-3
+        RowNum = 1
+        direction = LEFT
+    #RIGHT MOVEMENT
+    elif keys[RIGHT] == True:
+        vx = 3
+        RowNum = 0
+        direction = RIGHT
+    #turn off velocity
+    else:
+        vx = 0
+        #JUMPING
+    if keys[UP] == True and isOnGround == True: #only jump when on the ground
+        vy = -8
+        RowNum = 3
+        isOnGround = False
+        direction = UP
+        
+    if keys[A]==True:
+        vx2=-3
+        RowNum2 = 1
+        direction2 = A
+    #RIGHT MOVEMENT
+    elif keys[D] == True:
+        vx2 = 3
+        RowNum2 = 0
+        direction2 = D
+    #turn off velocity
+    else:
+        vx2 = 0
+        #JUMPING
+    if keys[W] == True and isOnGround2 == True: #only jump when on the ground
+        vy2 = -8
+        RowNum2 = 3
+        isOnGround2 = False
+        direction2 = W
+    print(vy2)
+        
+        
+    isOnGround=False
+    if p1.collide(xpos, ypos) != False:
+        isOnGround = True
+        vy = 0
+        ypos = p1.collide(xpos, ypos)-40
+    for i in range(len(platBag)):
+        if platBag[i].collide(xpos, ypos) != False:
+            isOnGround = True
+            vy = 0
+            ypos = platBag[i].collide(xpos, ypos)-40
+        
+        
+        
+    xpos+=vx #update player xpos
+    ypos+=vy
+    
+    xpos2+=vx2 #update player xpos
+    ypos2+=vy2
+    
+    
+    #COLLISION
+    
+    #collision with feetsies
+    if map[int((ypos+frameHeight)/50)][int((xpos+frameWidth/2)/50)]==1 or map[int((ypos+frameHeight)/50)][int((xpos+frameWidth/2)/50)]==2:
+        isOnGround = True
+        vy=0
+        
+    else:
+        isOnGround = False
+        
+    if map[int((ypos2+frameHeight2)/50)][int((xpos2+frameWidth2/2)/50)]==1 or map[int((ypos2+frameHeight2)/50)][int((xpos2+frameWidth2/2)/50)]==2:
+        isOnGround2 = True
+        vy2=0
+        
+    else:
+        isOnGround = False
+        
+    #bump your head, ouch!
+    if map[int((ypos)/50)][int((xpos+frameWidth/2)/50)]==1 or map[int((ypos)/50)][int((xpos+frameWidth/2)/50)]==2:
+        vy=0
+        
+    if map[int((ypos2)/50)][int((xpos2+frameWidth2/2)/50)]==1 or map[int((ypos2)/50)][int((xpos2+frameWidth2/2)/50)]==2:
+        vy2=0
+        
+    #left collision (it's extra long because we check both head and feets(well, knees) for left collision
+    if (map[int((ypos+frameHeight-10)/50)][int((xpos-10)/50)]==1 or map[int((ypos)/50)][int((xpos-10)/50)]==1 or map[int((ypos+frameHeight-10)/50)][int((xpos-10)/50)]==2 or map[int((ypos)/50)][int((xpos-10)/50)]==2 ) and direction == LEFT:
+        xpos+=3
+        
+    if (map[int((ypos2+frameHeight2-10)/50)][int((xpos2-10)/50)]==1 or map[int((ypos2)/50)][int((xpos2-10)/50)]==1 or map[int((ypos2+frameHeight2-10)/50)][int((xpos2-10)/50)]==2 or map[int((ypos2)/50)][int((xpos2-10)/50)]==2 ) and direction2 == D:
+        xpos2+=3
+        
+    #right collision needed here
+    if (map[int((ypos+frameHeight-10)/50)][int((xpos-10)/50)]==1 or map[int((ypos)/50)][int((xpos-10)/50)]==1 or map[int((ypos+frameHeight-10)/50)][int((xpos-10)/50)]==2 or map[int((ypos)/50)][int((xpos-10)/50)]==2 ) and direction == LEFT:
+        xpos-=3
+        
+    if (map[int((ypos2+frameHeight2-10)/50)][int((xpos2-10)/50)]==1 or map[int((ypos2)/50)][int((xpos2-10)/50)]==1 or map[int((ypos2+frameHeight2-10)/50)][int((xpos2-10)/50)]==2 or map[int((ypos2)/50)][int((xpos2-10)/50)]==2 ) and direction2 == D:
+        xpos2-=3   
+    #stop moving if you hit edge of screen (will be removed for scrolling)
+    if xpos+frameWidth > 800:
+        xpos-=3
+    if xpos<0:
+        xpos+=3
+        
+    if xpos2+frameWidth2 > 800:
+        xpos2-=3
+    if xpos2<0:
+        xpos2+=3
+
+    
+    #stop falling if on bottom of game screen
+    if ypos > 800-frameHeight:
+        isOnGround = True
+        vy = 0
+        ypos = 800-frameHeight
+    
+    if ypos2 > 800-frameHeight2:
+        isOnGround2 = True
+        vy2 = 0
+        ypos2 = 800-frameHeight2
+    
+    #gravity
+    if isOnGround == False:
+        vy+=.2 #notice this grows over time, aka ACCELERATION
+    
+    if isOnGround2 == False:
+        vy2+=.2 #notice this grows over time, aka ACCELERATION
+    
+
+        
+    #ANIMATION-------------------------------------------------------------------
+        
+    # Update Animation Information
+
+    if vx != 0 or vy!=0: #animate when moving
+        ticker+=1
+        if ticker%5==0: #only change frames every 10 ticks
+          frameNum+=1
+        if frameNum>=9: 
+           frameNum = 0
+           
+    if vx2 != 0 or vy2    != 0: #animate when moving
+        ticker2+=1
+        if ticker2%5==0: #only change frames every 10 ticks
+          frameNum2+=1
+        if frameNum2>=9: 
+           frameNum2 = 0
+  
+    # RENDER--------------------------------------------------------------------------------
+    # Once we've figured out what frame we're on and where we are, time to render.
+            
+    screen.fill((0,0,0)) #wipe screen so it doesn't smear
+    screen.blit(background,(0,0))
+    
+    p1.draw()
+    for i in range(len(platBag)):
+        platBag[i].draw()
+    #draw map
+    for i in range (16):
+        for j in range(16):
+            if map[i][j]==1:
+                screen.blit(dirt, (j*50, i*50), (0, 0, 50, 50))
+            if map[i][j]==2:
+                screen.blit(brick, (j*50, i*50), (0, 0, 50, 50))
+        
+    
+    screen.blit(player, (xpos, ypos), (frameWidth*frameNum, RowNum*frameHeight, frameWidth, frameHeight))
+    screen.blit(player2, (xpos2, ypos2), (frameWidth2*frameNum2, RowNum2*frameHeight2, frameWidth2, frameHeight2)) 
+    pygame.display.flip()#this actually puts the pixel on the screen
+    
+#end game loop------------------------------------------------------------------------------
+pygame.quit()
+
+
